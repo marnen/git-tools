@@ -1,0 +1,12 @@
+#!/bin/bash
+
+SUFFIX=_SPLIT
+branch=$1
+shift
+SPLIT_BRANCH=${branch}${SUFFIX}
+echo "Moving ${branch} aside..."
+git branch -m ${branch} $SPLIT_BRANCH
+echo "Splitting..."
+git ls-tree --name-only $SPLIT_BRANCH | xargs -I{} bash -c "echo {}; git branch ${branch}/{} $SPLIT_BRANCH; git filter-branch --subdirectory-filter {} -f -- ${branch}/{} $*"
+echo "Removing old ${branch}..."
+git branch -D $SPLIT_BRANCH
